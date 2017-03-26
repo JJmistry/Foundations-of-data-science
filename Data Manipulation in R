@@ -1,0 +1,63 @@
+# Loaded tidyr and dplyr from library.
+
+> library(tidyr)
+> library(dplyr)
+
+> library(readr)
+
+# Imported CSV file into R.
+
+> refine_original <- read_csv("~/MOOCs/Springboard/refine_original.csv")
+Parsed with column specification:
+cols(
+  company = col_character(),
+  `Product code / number` = col_character(),
+  address = col_character(),
+  city = col_character(),
+  country = col_character(),
+  name = col_character()
+)
+# Examined structure of Data
+
+> View(refine_original)
+
+# Loaded data into a data frame.
+
+> refine_original <- data.frame(refine_original)
+
+# Created a full address field, combining components of address to allow geotagging.
+
+> refine_original$full_address <- paste(refine_original$address, refine_original$city, refine_original$country, sep =", ")
+
+# Split combined product code/ number column into two separate columns.
+
+> refine_original <- refine_original %>% separate(Product.code...number, c("product_code","product_number"), sep= "-")
+
+> type<- c("Smartphone", "TV", "Laptop", "Tablet")
+> index <- c("p", "v", "x", "q")
+
+#Created a field, called product category, which has the name of a product, so it is easily readable instead of the product code.
+
+> refine_original$product_category <- type[match(refine_original$product_code, index)]
+
+#Removed all capital letters from company names.
+
+> refine_original$company <- tolower(refine_original$company)
+
+# Replaced a number of spelling errors in company names.
+> refine_original$company <- sub("ak zo", "akzo", refine_original$company)
+> refine_original$company <- sub("akz0", "akzo", refine_original$company)
+> refine_original$company <- sub("unilver", "unilever", refine_original$company)
+> refine_original$company <- gsub("\\bph\\w+", "phillips", refine_original$company)
+> refine_original$company <- gsub("\\bfil\\w+", "phillips", refine_original$company)
+
+#Created a new column with true/false (0,1) for each company in order to enable easy analysis.
+  
+> refine_original$company_phillips <- ifelse(refine_original$company =="phillips",1,0)
+> refine_original$company_unilever <- ifelse(refine_original$company =="unilever",1,0)
+> refine_original$company_van_houten <- ifelse(refine_original$company =="van_houten",1,0)
+> refine_original$company_akzo <- ifelse(refine_original$company =="akzo",1,0)
+
+# Wrote file to csv.
+
+> write.csv(refine_original, file = "Refine_clean.csv")
